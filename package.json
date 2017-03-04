@@ -1,0 +1,16 @@
+{
+  "name": "jupyter-canvas",
+  "version": "0.0.1",
+  "description": "Scrollable, zoomable jupyter notebooks for exploring data in different directions",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thomas Fletcher",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^4.7.1",
+    "d3-drag": "^1.0.3",
+    "d3-zoom": "^1.1.2"
+  }
+}
