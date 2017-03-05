@@ -21,6 +21,14 @@ define([
     $('head').append($link);
 
 
+    var runningTotalHeight = 0;
+    $('.cell').each(function(idx, cell){
+      console.log(runningTotalHeight);
+      d3.select(cell).style("transform", "translate(0px, "+runningTotalHeight+"px)");
+
+      runningTotalHeight += $(cell).height() + 20;
+    });
+
     //Allow zooming & panning of the canvas.
     function zoomed(){
       var transform = d3.event.transform;
