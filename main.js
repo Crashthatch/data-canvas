@@ -51,12 +51,7 @@ define([
 
       //This div contains the "highlight" backgrounds, which are also set absolutely.
       $('.CodeMirror-lines div:nth-child(1) div:nth-child(3)')
-        .css('position', 'absolute')
         .css("transform", "scale(" + 1/transform.k + ")");
-
-      $('.CodeMirror').each(function(i, el){
-        el.CodeMirror.refresh();
-      });
     }
     function zoomFilter(){
       //Only respond to left-mouse-button on the notebook / notebook_panel.

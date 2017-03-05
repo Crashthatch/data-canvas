@@ -40,5 +40,9 @@ div.CodeMirror-sizer{
     min-height: 0px !important;
     min-width: 0px !important;
 }
+/* Set position absolute so the CodeMirror highlighting shows up in the right place. */
+.CodeMirror-lines div:nth-child(1) div:nth-child(3){
+    position: absolute !important;
+}
 
 
