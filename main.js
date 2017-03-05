@@ -24,6 +24,14 @@ define([
     //This sits at the bottom of CodeMirror's textarea (to keep the height of the box, so scrolling can go there?), but is now too long.
     $('.CodeMirror-scroll > div:nth-child(2)').remove();
 
+    var runningTotalHeight = 0;
+    $('.cell').each(function(idx, cell){
+      console.log(runningTotalHeight);
+      d3.select(cell).style("transform", "translate(0px, "+runningTotalHeight+"px)");
+
+      runningTotalHeight += $(cell).height() + 20;
+    });
+
     //Allow zooming & panning of the canvas.
     function zoomed(){
       var transform = d3.event.transform;
