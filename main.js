@@ -25,7 +25,8 @@ define([
     var zoomed = function(){
       var transform = d3.event.transform;
       d3.select('#notebook')
-        .style("transform", "translate(" + transform.x + "px," + transform.y + "px) scale(" + transform.k + ")");
+        //.style("transform", "translate(" + transform.x + "px," + transform.y + "px) scale(" + transform.k + ")");
+        .style("transform", "translate(" + transform.x + "px," + transform.y + "px) ");
     }
     var zoom = d3.selectAll('#notebook_panel').call(d3.zoom().on("zoom", zoomed));
 
