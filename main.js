@@ -21,6 +21,9 @@ define([
     $('head').append($link);
 
 
+    //This sits at the bottom of CodeMirror's textarea (to keep the height of the box, so scrolling can go there?), but is now too long.
+    $('.CodeMirror-scroll > div:nth-child(2)').remove();
+
     //Allow zooming & panning of the canvas.
     function zoomed(){
       var transform = d3.event.transform;
@@ -36,6 +39,11 @@ define([
       d3.selectAll('.CodeMirror-cursors')
         .style("transform", "scale(" + 1/transform.k + ")");
 
+      //This div contains the "highlight" backgrounds, which are also set absolutely.
+      $('.CodeMirror-lines div:nth-child(1) div:nth-child(3)')
+        .css('position', 'absolute')
+        .css("transform", "scale(" + 1/transform.k + ")");
+
       $('.CodeMirror').each(function(i, el){
         el.CodeMirror.refresh();
       });
@@ -43,7 +51,7 @@ define([
     function zoomFilter(){
       //Only respond to left-mouse-button on the notebook / notebook_panel.
       // Do not start zooming / interfere with text selection etc.
-      return !event.button && event.type != 'wheel' && (event.target.id === 'notebook' || event.target.id === 'notebook_panel');
+      return !event.button && (event.target.id === 'notebook' || event.target.id === 'notebook_panel' || event.type === 'wheel');
     }
     var zoom = d3.select('#notebook_panel').call(d3.zoom().filter(zoomFilter).on("zoom", zoomed));
 
