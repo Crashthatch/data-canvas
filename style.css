@@ -24,4 +24,14 @@ div.cell.selected{
 }
 
 
+div.CodeMirror-cursors{
+    position: absolute;
+}
+/*Remove the sizer: CodeMirror sets a minimum-height & width property, but fails to account for the scale transform
+so the div ends up twice as big as it should be. */
+div.CodeMirror-sizer{
+    min-height: 0px !important;
+    min-width: 0px !important;
+}
+
 

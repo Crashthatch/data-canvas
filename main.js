@@ -26,6 +26,19 @@ define([
       var transform = d3.event.transform;
       d3.select('#notebook')
         .style("transform", "translate(" + transform.x + "px," + transform.y + "px) scale(" + transform.k + ")");
+
+      //Fix codemirror cursor. CM sets an absolute position for the cursor, based on where it really appears on the screen
+      // (using getClientBoundingRect) This then gets transformed, resulting in it "overshooting".
+      //
+      // If the textbox element is at coords 5,5 and we are zoomed to 2x (so element is appearing on the screen at 10,10),
+      // then CodeMirror sets absolute position of cursor to 10,10, which then gets tranformed and actually gets painted at 20,20.
+      // "Fix" by locally reversing the scale transform.
+      d3.selectAll('.CodeMirror-cursors')
+        .style("transform", "scale(" + 1/transform.k + ")");
+
+      $('.CodeMirror').each(function(i, el){
+        el.CodeMirror.refresh();
+      });
     }
     var zoom = d3.selectAll('#notebook_panel').call(d3.zoom().on("zoom", zoomed));
 
