@@ -24,6 +24,8 @@ define([
     //This sits at the bottom of CodeMirror's textarea (to keep the height of the box, so scrolling can go there?), but is now too long.
     $('.CodeMirror-scroll > div:nth-child(2)').remove();
 
+    $('.end_space').remove();
+
     var runningTotalHeight = 0;
     $('.cell').each(function(idx, cell){
       console.log(runningTotalHeight);
@@ -36,7 +38,7 @@ define([
     function zoomed(){
       var transform = d3.event.transform;
       d3.select('#notebook')
-        .style("transform", "translate(" + transform.x + "px," + transform.y + "px) scale(" + transform.k + ")");
+        .style("transform", "translate(" + Math.round(transform.x) + "px," + Math.round(transform.y) + "px) scale(" + transform.k + ")");
 
       //Fix codemirror cursor. CM sets an absolute position for the cursor, based on where it really appears on the screen
       // (using getClientBoundingRect) This then gets transformed, resulting in it "overshooting".
