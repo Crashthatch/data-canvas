@@ -1,9 +1,11 @@
 #To install for development:
 
-jupyter nbextension install ../jupyter-canvas --user --symlink
+git clone git@github.com:Crashthatch/data-canvas.git 
 
-(for distribution, don't pass --symlink)
+jupyter nbextension install ./data-canvas --user --symlink
+
+(for production, don't pass --symlink)
 
 #To enable plugin:
 
-jupyter nbextension enable jupyter-canvas/main
+jupyter nbextension enable data-canvas/main
