@@ -22,7 +22,7 @@ define([
 
 
     //Allow zooming & panning of the canvas.
-    var zoomed = function(){
+    function zoomed(){
       var transform = d3.event.transform;
       d3.select('#notebook')
         .style("transform", "translate(" + transform.x + "px," + transform.y + "px) scale(" + transform.k + ")");
@@ -40,7 +40,12 @@ define([
         el.CodeMirror.refresh();
       });
     }
-    var zoom = d3.selectAll('#notebook_panel').call(d3.zoom().on("zoom", zoomed));
+    function zoomFilter(){
+      //Only respond to left-mouse-button on the notebook / notebook_panel.
+      // Do not start zooming / interfere with text selection etc.
+      return !event.button && event.type != 'wheel' && (event.target.id === 'notebook' || event.target.id === 'notebook_panel');
+    }
+    var zoom = d3.select('#notebook_panel').call(d3.zoom().filter(zoomFilter).on("zoom", zoomed));
 
     function getTransform(elt){
       let transform = d3.select(elt).style('transform');
@@ -56,29 +61,31 @@ define([
     //Allow cells to be dragged to move them around.
     let cellStartPosition, mouseStartPosition = {};
     function startDrag(d){
-      cellStartPosition = getTransform(this);
+      var draggedCell = this.closest('.cell');
+      cellStartPosition = getTransform(draggedCell);
 
-      mouseStartPosition.x = d3.event.x;
-      mouseStartPosition.y = d3.event.y;
+      mouseStartPosition.x = d3.event.sourceEvent.pageX;
+      mouseStartPosition.y = d3.event.sourceEvent.pageY;
     }
 
-    function dragged(d) {
+    function dragged() {
+      var draggedCell = this.closest('.cell');
+
       //Figure out how much the mouse has moved during this drag.
       let mouseMoved = {};
-      mouseMoved.x = d3.event.x - mouseStartPosition.x;
-      mouseMoved.y = d3.event.y - mouseStartPosition.y;
+      mouseMoved.x = d3.event.sourceEvent.pageX - mouseStartPosition.x;
+      mouseMoved.y = d3.event.sourceEvent.pageY - mouseStartPosition.y;
 
       //If we are zoomed in, 10 px of the mouse might only correspond to less actual movement, & vice versa.
       var currentZoom = getTransform('#notebook').k;
       mouseMoved.x /= currentZoom;
       mouseMoved.y /= currentZoom;
 
-
       //New position of cell should be its starting location + whatever the mouse has moved by.
-      d3.select(this).style("transform", "translate(" + (cellStartPosition.x + mouseMoved.x) + "px," + (cellStartPosition.y + mouseMoved.y) + "px)");
+      d3.select(draggedCell).style("transform", "translate(" + (cellStartPosition.x + mouseMoved.x) + "px," + (cellStartPosition.y + mouseMoved.y) + "px)");
     }
 
-    var drag = d3.selectAll(".cell").call(d3.drag().on('start', startDrag).on("drag", dragged));
+    var drag = d3.selectAll(".cell .input_prompt, .cell .out_prompt_overlay").call(d3.drag().on('start', startDrag).on("drag", dragged));
 
   }
 

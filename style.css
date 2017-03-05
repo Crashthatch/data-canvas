@@ -22,6 +22,9 @@ div.cell{
 div.cell.selected{
     background-image: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, white 5px, white 100%);
 }
+.edit_mode div.cell.selected{
+    background-image: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, white 5px, white 100%);
+}
 
 
 div.CodeMirror-cursors{
