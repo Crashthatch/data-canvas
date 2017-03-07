@@ -28,9 +28,17 @@ define([
 
     var runningTotalHeight = 0;
     $('.cell').each(function(idx, cell){
-      d3.select(cell).style("transform", "translate(0px, "+runningTotalHeight+"px)");
+      //Get the metadata properties of the cell.
+      var cellObj = Jupyter.notebook.get_cells().find( (cell) => cell.element[0] == this.closest('.cell') );
 
-      runningTotalHeight += $(cell).height() + 20;
+      if( cellObj.metadata.x && cellObj.metadata.y ){
+        d3.select(cell).style("transform", "translate("+cellObj.metadata.x+"px, "+cellObj.metadata.y+"px)");
+      }
+      else{
+        //Default to stacking up in a column (eg. for notebooks created without this plugin).
+        d3.select(cell).style("transform", "translate(0px, "+runningTotalHeight+"px)");
+        runningTotalHeight += $(cell).height() + 20;
+      }
     });
 
     //Allow zooming & panning of the canvas.
@@ -103,7 +111,17 @@ define([
       d3.select(draggedCell).style("transform", "translate(" + (cellStartPosition.x + mouseMoved.x) + "px," + (cellStartPosition.y + mouseMoved.y) + "px)");
     }
 
-    var drag = d3.selectAll(".cell .input_prompt, .cell .out_prompt_overlay").call(d3.drag().on('start', startDrag).on("drag", dragged));
+    function endDrag(){
+      var draggedCellObj = Jupyter.notebook.get_cells().find( (cell) => cell.element[0] == this.closest('.cell') );
+
+      //Set x & y properties on the metadata of the cell so we store its position (these get saved and persisted across reloads).
+      var transform = getTransform(this.closest('.cell'));
+      draggedCellObj.metadata.x = transform.x;
+      draggedCellObj.metadata.y = transform.y;
+    }
+
+
+    var drag = d3.selectAll(".cell .input_prompt, .cell .out_prompt_overlay").call(d3.drag().on('start', startDrag).on("drag", dragged).on("end", endDrag));
 
   }
 
