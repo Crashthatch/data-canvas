@@ -1,5 +1,13 @@
 #notebook_panel{
     overflow: hidden;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+    cursor: grab;
+}
+#notebook_panel:active{
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
 }
 div#notebook{
     position: fixed;
@@ -22,6 +30,7 @@ div.cell{
     box-shadow: 0px 0px 12px 1px rgba(87, 87, 87, 0.2);
     position:absolute;
     width: 800px;
+    cursor: auto;
 }
 div.cell.selected{
     background-image: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, white 5px, white 100%);
@@ -45,4 +54,6 @@ div.CodeMirror-sizer{
     position: absolute !important;
 }
 
-
+.input_prompt, .out_prompt_overlay{
+    cursor: move;
+}
