@@ -28,7 +28,6 @@ define([
 
     var runningTotalHeight = 0;
     $('.cell').each(function(idx, cell){
-      console.log(runningTotalHeight);
       d3.select(cell).style("transform", "translate(0px, "+runningTotalHeight+"px)");
 
       runningTotalHeight += $(cell).height() + 20;
@@ -58,7 +57,13 @@ define([
       // Do not start zooming / interfere with text selection etc.
       return !event.button && (event.target.id === 'notebook' || event.target.id === 'notebook_panel' || event.type === 'wheel');
     }
-    var zoom = d3.select('#notebook_panel').call(d3.zoom().filter(zoomFilter).on("zoom", zoomed));
+
+    function endZoom(){
+      $('.CodeMirror').each(function(i, el){
+        el.CodeMirror.refresh();
+      });
+    }
+    var zoom = d3.select('#notebook_panel').call(d3.zoom().filter(zoomFilter).on("zoom", zoomed).on("end", endZoom));
 
     function getTransform(elt){
       let transform = d3.select(elt).style('transform');
