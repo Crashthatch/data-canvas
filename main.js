@@ -5,6 +5,8 @@ define([
   Jupyter,
   d3
 ) {
+  const CELL_WIDTH = 800; //Must match the CSS style for .cell
+
   //Allow zooming & panning of the canvas.
   function zoomed(){
     var transform = d3.event.transform;
@@ -47,6 +49,29 @@ define([
     }
   }
 
+  function getCanvasTransform(){
+    return getTransform('#notebook');
+  }
+
+  function getCameraCenter(){
+    var screenWidth = $('#notebook_panel').width();
+    var screenHeight = $('#notebook_panel').height();
+
+    var canvasTransform = getCanvasTransform();
+    return {
+      x: (-canvasTransform.x + screenWidth/2) * 1/canvasTransform.k,
+      y: (-canvasTransform.y + screenHeight/2) * 1/canvasTransform.k
+    }
+  }
+
+  function getNewCellPosition(){
+    var newPosition = getCameraCenter();
+    newPosition.x -= CELL_WIDTH / 2;
+    newPosition.y -= 100;
+
+    return newPosition;
+  }
+
   //Allow cells to be dragged to move them around.
   let cellStartPosition, mouseStartPosition = {};
   function startDrag(d){
@@ -87,6 +112,27 @@ define([
     selection.call(d3.drag().on('start', startDrag).on("drag", dragged).on("end", endDrag));
   }
 
+  function overrideInsertCellHandlers(){
+    function createHandler(oldAction){
+      return function(env){
+        oldAction(env);
+        var newCell = Jupyter.notebook.get_selected_cell();
+
+        //Move the new cell to the centre of the current screen (rather than creating it at 0,0)
+        var newLocation = getNewCellPosition();
+        d3.select(newCell.element[0]).style("transform", "translate(" + newLocation.x + "px," + newLocation.y + "px)");
+        newCell.metadata.x = newLocation.x;
+        newCell.metadata.y = newLocation.y;
+
+        makeDraggable(d3.select(newCell.element[0]).selectAll(".cell .input_prompt, .cell .out_prompt_overlay"));
+      }
+    }
+
+    //Override the "Add cell" actions to set the x / y coords of any newly added cells:
+    Jupyter.actions._actions['jupyter-notebook:insert-cell-above'].handler = createHandler(Jupyter.actions._actions['jupyter-notebook:insert-cell-above'].handler);
+    Jupyter.actions._actions['jupyter-notebook:insert-cell-below'].handler = createHandler(Jupyter.actions._actions['jupyter-notebook:insert-cell-below'].handler);
+  }
+
   function load_ipython_extension() {
     console.log(
       'This is the current notebook application instance:',
@@ -121,11 +167,12 @@ define([
     });
 
     //Add background zoom behaviour:
-    var zoom = d3.select('#notebook_panel').call(d3.zoom().filter(zoomFilter).on("zoom", zoomed).on("end", endZoom));
+    d3.select('#notebook_panel').call(d3.zoom().filter(zoomFilter).on("zoom", zoomed).on("end", endZoom));
 
     //Make all initial cells draggable:
     makeDraggable( d3.selectAll(".cell .input_prompt, .cell .out_prompt_overlay") );
 
+    overrideInsertCellHandlers();
   }
 
   return {

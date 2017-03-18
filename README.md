@@ -9,3 +9,7 @@ jupyter nbextension install ./data-canvas --user --symlink
 #To enable plugin:
 
 jupyter nbextension enable data-canvas/main
+
+#Issues, features & bugs:
+
+https://huboard.com/Crashthatch/data-canvas/#/
