@@ -167,7 +167,12 @@ define([
     });
 
     //Add background zoom behaviour:
-    d3.select('#notebook_panel').call(d3.zoom().filter(zoomFilter).on("zoom", zoomed).on("end", endZoom));
+    var zoomBehaviour = d3.zoom().filter(zoomFilter).on("zoom", zoomed).on("end", endZoom);
+    //Start camera panned left slightly so that cells appear in the middle, not left-aligned to the page.
+    zoomBehaviour.translateBy(d3.select('#notebook_panel'), getCameraCenter().x - CELL_WIDTH/2, 100);
+    d3.select('#notebook_panel').call(zoomBehaviour);
+
+
 
     //Make all initial cells draggable:
     makeDraggable( d3.selectAll(".cell .input_prompt, .cell .out_prompt_overlay") );
