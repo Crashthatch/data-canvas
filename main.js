@@ -1,9 +1,11 @@
 define([
   'base/js/namespace',
   'nbextensions/jupyter-canvas/node_modules/d3/build/d3',
+  'nbextensions/jupyter-canvas/node_modules/lodash/lodash'
 ], function(
   Jupyter,
-  d3
+  d3,
+  _
 ) {
   const CELL_WIDTH = 800; //Must match the CSS style for .cell
 
@@ -25,6 +27,8 @@ define([
     //This div contains the "highlight" backgrounds, which are also set absolutely.
     $('.CodeMirror-lines div:nth-child(1) div:nth-child(3)')
       .css("transform", "scale(" + 1/transform.k + ")");
+
+    debouncedRefreshAllCodeMirrors();
   }
   function zoomFilter(){
     //Only respond to left-mouse-button on the notebook / notebook_panel.
@@ -32,11 +36,13 @@ define([
     return !event.button && (event.target.id === 'notebook' || event.target.id === 'notebook_panel' || event.type === 'wheel');
   }
 
-  function endZoom(){
+  function refreshAllCodeMirrors(){
+    console.log('refreshing codeMirrors');
     $('.CodeMirror').each(function(i, el){
       el.CodeMirror.refresh();
     });
   }
+  var debouncedRefreshAllCodeMirrors = _.debounce(refreshAllCodeMirrors, 400);
 
   function getTransform(elt){
     let transform = d3.select(elt).style('transform');
@@ -167,7 +173,7 @@ define([
     });
 
     //Add background zoom behaviour:
-    var zoomBehaviour = d3.zoom().filter(zoomFilter).on("zoom", zoomed).on("end", endZoom);
+    var zoomBehaviour = d3.zoom().filter(zoomFilter).on("zoom", zoomed);
     //Start camera panned left slightly so that cells appear in the middle, not left-aligned to the page.
     zoomBehaviour.translateBy(d3.select('#notebook_panel'), getCameraCenter().x - CELL_WIDTH/2, 100);
     d3.select('#notebook_panel').call(zoomBehaviour);
