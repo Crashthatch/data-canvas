@@ -53,6 +53,17 @@ div.CodeMirror-sizer{
 .CodeMirror-lines div:nth-child(1) div:nth-child(3){
     position: absolute !important;
 }
+/* Fix problem where we can't scroll all the way to the right to see the end of long lines in codemirror */
+.CodeMirror-scroll{
+    margin-right: 0px;
+    margin-bottom: 0px;
+    padding-bottom: 15px;
+    overflow: hidden !important;
+}
+.CodeMirror-vscrollbar{
+    display: none !important;
+}
+
 
 .input_prompt, .out_prompt_overlay{
     cursor: move;

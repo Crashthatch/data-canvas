@@ -37,7 +37,7 @@ define([
   }
 
   function refreshAllCodeMirrors(){
-    console.log('refreshing codeMirrors');
+    //TODO: Refresh only those on-screen.
     $('.CodeMirror').each(function(i, el){
       el.CodeMirror.refresh();
     });
@@ -170,6 +170,9 @@ define([
         d3.select(cell).style("transform", "translate(0px, "+runningTotalHeight+"px)");
         runningTotalHeight += $(cell).height() + 30;
       }
+
+      //Set codemirror not to hide lines it thinks are off-screen (because they might not really be off-screen).
+      cellObj.code_mirror.options.viewportMargin = Infinity;
     });
 
     //Add background zoom behaviour:
