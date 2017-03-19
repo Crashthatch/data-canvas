@@ -1,7 +1,18 @@
 #notebook_panel{
     overflow: hidden;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+    cursor: grab;
+}
+#notebook_panel:active{
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
 }
 div#notebook{
+    position: fixed;
+    height: 0px;
+    width: 0px;
     transform-origin: 0 0;
     overflow-x: visible;
     overflow-y: visible;
@@ -19,6 +30,7 @@ div.cell{
     box-shadow: 0px 0px 12px 1px rgba(87, 87, 87, 0.2);
     position:absolute;
     width: 800px;
+    cursor: auto;
 }
 div.cell.selected{
     background-image: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, white 5px, white 100%);
@@ -28,4 +40,20 @@ div.cell.selected{
 }
 
 
+div.CodeMirror-cursors{
+    position: absolute;
+}
+/*Remove the sizer: CodeMirror sets a minimum-height & width property, but fails to account for the scale transform
+so the div ends up twice as big as it should be. */
+div.CodeMirror-sizer{
+    min-height: 0px !important;
+    min-width: 0px !important;
+}
+/* Set position absolute so the CodeMirror highlighting shows up in the right place. */
+.CodeMirror-lines div:nth-child(1) div:nth-child(3){
+    position: absolute !important;
+}
 
+.input_prompt, .out_prompt_overlay{
+    cursor: move;
+}
