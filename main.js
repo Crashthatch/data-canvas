@@ -158,17 +158,36 @@ define([
     $('.end_space').remove();
 
     var runningTotalHeight = 0;
-    $('.cell').each(function(idx, cell){
+    var placedCellLocations = [];
+    var cells = _.sortBy(Jupyter.notebook.get_cells(), [cellObj => cellObj.metadata.x == undefined]); //Place those that already have set positions first.
+    cells.forEach(function(cellObj){
       //Get the metadata properties of the cell.
-      var cellObj = Jupyter.notebook.get_cells().find( (cell) => cell.element[0] == this.closest('.cell') );
+      var cellElt = cellObj.element[0];
+      var cellHeight = $(cellElt).outerHeight();
 
-      if( cellObj.metadata.x && cellObj.metadata.y ){
-        d3.select(cell).style("transform", "translate("+cellObj.metadata.x+"px, "+cellObj.metadata.y+"px)");
+      if( cellObj.metadata.x != undefined && cellObj.metadata.y != undefined ){
+        d3.select(cellElt).style("transform", "translate("+cellObj.metadata.x+"px, "+cellObj.metadata.y+"px)");
+        placedCellLocations.push( {top: cellObj.metadata.y, bottom: cellObj.metadata.y + cellHeight, left: cellObj.metadata.x, right: cellObj.metadata.x + CELL_WIDTH} );
       }
       else{
         //Default to stacking up in a column (eg. for notebooks created without this plugin).
-        d3.select(cell).style("transform", "translate(0px, "+runningTotalHeight+"px)");
-        runningTotalHeight += $(cell).height() + 30;
+
+        //Check to see if there is already a cell positioned starting above this, such that this cell would be placed on top of it.
+        let blockedByCell = true;
+        let thisCellLocation = {top: runningTotalHeight, bottom: runningTotalHeight + cellHeight, left: 0, right: CELL_WIDTH};
+        while( blockedByCell ){
+          runningTotalHeight += 30; //Move down 30px and check again.
+          thisCellLocation.top += 30;
+          thisCellLocation.bottom += 30;
+          blockedByCell = placedCellLocations.find( function(blockedLocation){
+            return ((blockedLocation.right > thisCellLocation.left && blockedLocation.left < thisCellLocation.right )
+                    && (blockedLocation.bottom > thisCellLocation.top && blockedLocation.top < thisCellLocation.bottom ))
+          });
+        }
+
+        d3.select(cellElt).style("transform", "translate(0px, "+thisCellLocation.top+"px)");
+        placedCellLocations.push( thisCellLocation );
+        runningTotalHeight = thisCellLocation.bottom;
       }
 
       //Set codemirror not to hide lines it thinks are off-screen (because they might not really be off-screen).
