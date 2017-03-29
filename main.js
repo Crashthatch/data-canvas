@@ -41,6 +41,11 @@ define([
     $('.CodeMirror').each(function(i, el){
       el.CodeMirror.refresh();
     });
+    //Stops the scrollbar shrinking as we zoom in.
+    $('.CodeMirror-hscrollbar > div').each( function(i, el){
+      $(el).css("width", parseInt($(el).css("width")) / getCanvasTransform().k + "px" );
+    });
+    //  .css("transform", "scale(" + 1/getCanvasTransform().k + ")");
   }
   var debouncedRefreshAllCodeMirrors = _.debounce(refreshAllCodeMirrors, 400);
 

@@ -63,6 +63,13 @@ div.CodeMirror-sizer{
 .CodeMirror-vscrollbar{
     display: none !important;
 }
+/*Stop the funny gap appearing on the right of the h-scrollbar (Possibly meant to make room for the vertical scrollbar that we hide?)*/
+.CodeMirror-hscrollbar{
+    right: 0px !important;
+}
+.CodeMirror-scrollbar-filler{
+    display: none !important;
+}
 
 
 .input_prompt, .out_prompt_overlay{
