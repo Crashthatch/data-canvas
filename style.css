@@ -75,3 +75,9 @@ div.CodeMirror-sizer{
 .input_prompt, .out_prompt_overlay{
     cursor: move;
 }
+.input_area{
+    height: 50px;
+}
+.CodeFlask{
+    height: 100%;
+}

@@ -1,11 +1,17 @@
 define([
   'base/js/namespace',
   'nbextensions/jupyter-canvas/node_modules/d3/build/d3',
-  'nbextensions/jupyter-canvas/node_modules/lodash/lodash'
+  'nbextensions/jupyter-canvas/node_modules/lodash/lodash',
+  'nbextensions/jupyter-canvas/node_modules/prismjs/prism',
+  'nbextensions/jupyter-canvas/node_modules/prismjs/components/prism-python',
+  'nbextensions/jupyter-canvas/node_modules/prismjs/plugins/line-numbers/prism-line-numbers',
+  'nbextensions/jupyter-canvas/node_modules/codeflask/src/codeflask',
 ], function(
   Jupyter,
   d3,
-  _
+  _,
+  prism,
+  codeflask
 ) {
   const CELL_WIDTH = 800; //Must match the CSS style for .cell
 
@@ -21,7 +27,7 @@ define([
     // If the textbox element is at coords 5,5 and we are zoomed to 2x (so element is appearing on the screen at 10,10),
     // then CodeMirror sets absolute position of cursor to 10,10, which then gets tranformed and actually gets painted at 20,20.
     // "Fix" by locally reversing the scale transform.
-    d3.selectAll('.CodeMirror-cursors')
+    /*d3.selectAll('.CodeMirror-cursors')
       .style("transform", "scale(" + 1/transform.k + ")");
 
     //This div contains the "highlight" backgrounds, which are also set absolutely.
@@ -29,6 +35,7 @@ define([
       .css("transform", "scale(" + 1/transform.k + ")");
 
     debouncedRefreshAllCodeMirrors();
+    */
   }
   function zoomFilter(){
     //Only respond to left-mouse-button on the notebook / notebook_panel.
@@ -36,7 +43,7 @@ define([
     return !event.button && (event.target.id === 'notebook' || event.target.id === 'notebook_panel' || event.type === 'wheel');
   }
 
-  function refreshAllCodeMirrors(){
+  /*function refreshAllCodeMirrors(){
     //TODO: Refresh only those on-screen.
     $('.CodeMirror').each(function(i, el){
       el.CodeMirror.refresh();
@@ -47,7 +54,7 @@ define([
     });
     //  .css("transform", "scale(" + 1/getCanvasTransform().k + ")");
   }
-  var debouncedRefreshAllCodeMirrors = _.debounce(refreshAllCodeMirrors, 400);
+  var debouncedRefreshAllCodeMirrors = _.debounce(refreshAllCodeMirrors, 100);*/
 
   function getTransform(elt){
     let transform = d3.select(elt).style('transform');
@@ -144,6 +151,37 @@ define([
     Jupyter.actions._actions['jupyter-notebook:insert-cell-below'].handler = createHandler(Jupyter.actions._actions['jupyter-notebook:insert-cell-below'].handler);
   }
 
+  var flask = new CodeFlask;
+
+  function replaceCodemirrors(){
+    Jupyter.notebook.get_cells().forEach( function(cell, idx){
+      var cellValue = cell.code_mirror.getValue();
+      var cmParent = cell.code_mirror.getWrapperElement().parentNode;
+      cmParent.removeChild(cell.code_mirror.getWrapperElement());
+      //var editor = document.createElement('textarea');
+      //cmParent.appendChild(editor);
+      var editorElt = document.createElement('div');
+      editorElt.setAttribute('id', 'cell_'+idx);
+      cmParent.appendChild(editorElt);
+      flask.run('#cell_'+idx, { language: 'python', lineNumbers: true});
+      //Must mock these functions as the notebook expects them to be defined and will call them when cells are selected, run etc.
+      cell.code_mirror = $(editorElt).find('textarea');
+      cell.code_mirror.refresh = function(){ return false; };
+      cell.code_mirror.getOption = function(){ return false; };
+      cell.code_mirror.setOption = function(){ return false; };
+      cell.code_mirror.getValue = $(editorElt).find('textarea').val;
+      cell.code_mirror.setValue = $(editorElt).find('textarea').val;
+      cell.code_mirror.getLine = function(){ return {
+        match: function(){ return false; }
+      }};
+      cell.code_mirror.lineCount = function(){ return 1; };
+
+      cell.code_mirror.setValue(cellValue);
+
+      cell.bind_events();
+    })
+  }
+
   function load_ipython_extension() {
     console.log(
       'This is the current notebook application instance:',
@@ -152,13 +190,19 @@ define([
     console.log( Jupyter.actions._actions );
     console.log( d3.selectAll('#notebook') );
 
+    replaceCodemirrors();
+
     //Inject our CSS:
-    var $link = $('<link rel="stylesheet" type="text/css" href="/nbextensions/jupyter-canvas/style.css">');
+    var $link = $('\
+    <link rel="stylesheet" type="text/css" href="/nbextensions/jupyter-canvas/node_modules/prismjs/themes/prism.css"> \
+    \<link rel="stylesheet" type="text/css" href="/nbextensions/jupyter-canvas/node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css"> \
+    <link rel="stylesheet" type="text/css" href="/nbextensions/jupyter-canvas/node_modules/codeflask/src/codeflask.css"> \
+    <link rel="stylesheet" type="text/css" href="/nbextensions/jupyter-canvas/style.css">');
     $('head').append($link);
 
 
     //This sits at the bottom of CodeMirror's textarea (to keep the height of the box, so scrolling can go there?), but is now too long.
-    $('.CodeMirror-scroll > div:nth-child(2)').remove();
+    //$('.CodeMirror-scroll > div:nth-child(2)').remove();
 
     $('.end_space').remove();
 
@@ -196,7 +240,7 @@ define([
       }
 
       //Set codemirror not to hide lines it thinks are off-screen (because they might not really be off-screen).
-      cellObj.code_mirror.options.viewportMargin = Infinity;
+      //cellObj.code_mirror.options.viewportMargin = Infinity;
     });
 
     //Add background zoom behaviour:
