@@ -52,8 +52,11 @@ define([
   function getTransform(elt){
     let transform = d3.select(elt).style('transform');
     if( transform != "none" ){
-      transform = transform.replace(/[^0-9\-.,]/g, '').split(',');
-      return {x:parseFloat(transform[4]), y: parseFloat(transform[5]), k: parseFloat(transform[0])};
+      let translate = transform.match(/translate\(([0-9-\.]*)p?x?, ?([0-9-\.]*)p?x?\)/)
+      let scale = transform.match(/scale\(([0-9\.]*)\)/)
+      scale = scale ? scale[1] : 1
+      console.log(transform, translate, scale)
+      return {x:parseFloat(translate[1]), y: parseFloat(translate[2]), k: parseFloat(scale)};
     }
     else{
       return {x: 0, y: 0, k: 1};
