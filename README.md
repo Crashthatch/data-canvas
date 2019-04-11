@@ -1,7 +1,7 @@
 #To install for development:
 
 ```
-git clone git@github.com:Crashthatch/data-canvas.git jupyter-canvas
+git clone git@github.com:Crashthatch/jupyter-canvas.git
 cd jupyter-canvas 
 npm install
 cd ..
